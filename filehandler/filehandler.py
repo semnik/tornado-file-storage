@@ -1,8 +1,9 @@
-import tornado.web
+import json
 import logging
 import os
 import uuid
-import json
+import tornado.web
+from tornado import iostream, gen
 
 
 class FileHandler(tornado.web.RequestHandler):
@@ -11,24 +12,24 @@ class FileHandler(tornado.web.RequestHandler):
 
         self.upload_dir = upload_dir
 
-    @tornado.gen.coroutine
-    def put(self):
-        binary_data = self.request.body
+    async def put(self):
+
         self.set_header('Content-Type', 'application/json')
         filename = str(uuid.uuid4())
-        try:
-            with open(os.path.join(self.upload_dir, filename), 'wb') as file:
-                file.write(binary_data)
-            logging.info("file uploaded , saved as %s",
-                         filename)
-            self.set_status(status_code=200)
-            self.write(json.dumps({"file_uuid": filename}))
 
-        except Exception as e:
-            logging.error("Failed because %s", str(e))
+        binary_data = self.request.body
 
-    @tornado.gen.coroutine
-    def get(self):
+        filepath = os.path.join(self.upload_dir, filename)
+        with open(filepath, 'wb') as file:
+            file.write(binary_data)
+            await gen.sleep(0.000000001)
+
+        logging.info("file uploaded , saved as %s",
+                     filename)
+        self.set_status(status_code=200)
+        self.write(json.dumps({"file_uuid": filename}))
+
+    async def get(self):
 
         file_uuid = self.request.headers.get('file_uuid')
 
@@ -40,21 +41,29 @@ class FileHandler(tornado.web.RequestHandler):
 
         if file_exists:
 
-            buf_size = 4096
+            chunk_size = 1024 * 1024 * 1  # 1 MiB
             self.set_header('Content-Type', 'application/octet-stream')
             self.set_header('Content-Disposition', 'attachment; filename=' + file_uuid)
-            with open(file_path, 'r') as f:
+            with open(file_path, 'rb') as f:
                 while True:
-                    data = f.read(buf_size)
-                    if not data:
+
+                    chunk = f.read(chunk_size)
+                    if not chunk:
                         break
-                    self.write(data)
-            self.finish()
+                    try:
+                        self.write(chunk)
+                        await self.flush()
+                    except iostream.StreamClosedError:
+                        break
+                    finally:
+                        del chunk
+                        # pause the coroutine so other handlers can run
+                        await gen.sleep(0.000000001)  # 1 nanosecond
+
             self.set_status(status_code=200)
         else:
             self.set_status(status_code=204)
 
-    @tornado.gen.coroutine
     def head(self):
         file_uuid = self.request.headers.get('file_uuid')
 
