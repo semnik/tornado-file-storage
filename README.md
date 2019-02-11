@@ -19,8 +19,9 @@ c.       скачать используя uuid
 3)      upload, download, check - методы покрыть тестами (pytest | unittest | doctest)
 не сделано
 4)      завернуть в docker (ubuntu | alpine)
-Dockerfile публичный образ доступен  
-
+Dockerfile есть в репозитории, публичный образ доступен , чтобы запустить нужно выполнить  
+docker pull 24031993/tornado_file_storage
+docker run 24031993/tornado_file_storage
 
 Плюсом будет:
 
