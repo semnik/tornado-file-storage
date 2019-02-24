@@ -3,5 +3,7 @@ RUN mkdir -p /opt/tornado-file-storage
 COPY . /opt/tornado-file-storage
 WORKDIR /opt/tornado-file-storage
 RUN pip install -r requirements.txt
-EXPOSE 8888
+RUN cd /opt/tornado-file-storage
+EXPOSE 9999
 ENTRYPOINT ["python3", "main.py"]
+

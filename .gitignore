@@ -3,3 +3,4 @@ virtualenv/
 .ropeproject
 .idea/
 storage/
+venv/

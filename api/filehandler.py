@@ -4,7 +4,6 @@ import os
 import uuid
 import tornado.web
 from tornado import iostream, gen
-from tornado.ioloop import IOLoop
 
 
 class FileHandler(tornado.web.RequestHandler):
@@ -35,6 +34,7 @@ class FileHandler(tornado.web.RequestHandler):
         file_uuid = self.request.headers.get('file_uuid')
 
         if file_uuid is None:
+
             self.send_error(400, message="file_uuid ")
 
         file_path = os.path.join(self.upload_dir, file_uuid)
@@ -48,8 +48,6 @@ class FileHandler(tornado.web.RequestHandler):
             with open(file_path, 'rb') as f:
                 while True:
 
-                    deadline = IOLoop.current().time() + 0.1  # set minimum chunk_size handle time
-
                     chunk = f.read(chunk_size)
                     if not chunk:
                         break
@@ -61,7 +59,7 @@ class FileHandler(tornado.web.RequestHandler):
                     finally:
                         del chunk
                         # pause the coroutine so other handlers can run
-                        await gen.sleep(deadline - IOLoop.current().time())  # 1 nanosecond
+                        await gen.sleep(0.000000001)  # 1 nanosecond
 
             self.set_status(status_code=200)
         else:

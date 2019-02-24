@@ -1,26 +1,43 @@
 #!/usr/bin/env python
+import json
+import os
 
 import tornado.ioloop
 import tornado.web
-from tornado.options import define, options, parse_command_line
-import os
-import logging
-from filehandler import filehandler
+
+from api import check, download, upload
+
+
+class HelloWorld(tornado.web.RequestHandler):
+    def get(self):
+        json.dumps({"server": 'Tornado File Storage API v0.3'})
+        self.write(json.dumps({"server": 'Tornado File Storage API v0.3'}))
+
+
+def get_app():
+    port = 9999
+    file_storage_path = "storage"
+
+    if not os.path.exists(file_storage_path):
+        os.mkdir(file_storage_path)
+    # TODO : Bad request handling via validation
+    app = tornado.web.Application([
+        (r"/check/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12})", check.CheckHandler,
+         dict(upload_dir=file_storage_path)),
+        (r"/download/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12})", download.DownloadHandler,
+         dict(upload_dir=file_storage_path)),
+        (r"/upload", upload.UploadHandler, dict(upload_dir=file_storage_path)),
+        (r"/", HelloWorld)
+    ])
+
+    app.listen(port)
+    return app
+
+
+def start_server():
+    get_app()
+    tornado.ioloop.IOLoop.current().start()
+
 
 if __name__ == "__main__":
-
-    define("port", default=8888, type=int)
-    define('file_storage_path', type=str, default="storage")
-    parse_command_line()
-    if not os.path.exists(options.file_storage_path):
-        os.mkdir(options.file_storage_path)
-    application = tornado.web.Application(
-        [
-
-            (r"/", filehandler.FileHandler,
-             dict(upload_dir=options.file_storage_path)),
-        ]
-    )
-    application.listen(options.port)
-    logging.info("Server running on port %d", options.port)
-    tornado.ioloop.IOLoop.current().start()
+    start_server()
