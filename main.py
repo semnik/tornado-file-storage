@@ -1,10 +1,8 @@
-#!/usr/bin/env python
 import json
 import os
 
 import tornado.ioloop
 import tornado.web
-
 from api import check, download, upload
 
 
@@ -20,7 +18,10 @@ def get_app():
 
     if not os.path.exists(file_storage_path):
         os.mkdir(file_storage_path)
+
     # TODO : Bad request handling via validation
+    # TODO : add  re.IGNORECASE for uuid validation
+
     app = tornado.web.Application([
         (r"/check/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12})", check.CheckHandler,
          dict(upload_dir=file_storage_path)),

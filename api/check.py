@@ -9,10 +9,7 @@ class CheckHandler(tornado.web.RequestHandler):
 
         self.upload_dir = upload_dir
 
-    async def get(self, file_uuid):
-
-        if file_uuid is None:
-            self.send_error(400, message="file_uuid ")
+    def get(self, file_uuid):
 
         file_path = os.path.join(self.upload_dir, file_uuid)
         file_exists = os.path.isfile(file_path)

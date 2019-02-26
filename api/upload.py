@@ -44,5 +44,9 @@ class UploadHandler(tornado.web.RequestHandler):
 
             bytes_stream.close()
 
-        self.write(json.dumps({"file_uuid": filename}))
-        return self.set_status(status_code=200)
+        self.set_header("Content-Type", "application/json")
+
+        response = json.dumps({"file_uuid": filename})
+
+        self.write(response)
+        self.set_status(status_code=200)

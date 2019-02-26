@@ -3,7 +3,6 @@ import os
 import tornado.web
 from tornado import iostream, gen
 
-
 class DownloadHandler(tornado.web.RequestHandler):
 
     def initialize(self, upload_dir):
