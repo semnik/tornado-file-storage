@@ -12,7 +12,11 @@ a.       загрузить  файл, получить uuid
 
 реализован методом POST ,в ответе формата json содержится uuid
 Например :
+
+
 touch foo
+
+
 curl -i -X POST http://localhost:9999/upload -H "Content-Type: text/xml" --data-binary "@./foo"
 
 
