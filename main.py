@@ -22,6 +22,7 @@ def get_app():
     # TODO : Bad request handling via validation
     # TODO : add  re.IGNORECASE for uuid validation
 
+
     app = tornado.web.Application([
         (r"/check/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12})", check.CheckHandler,
          dict(upload_dir=file_storage_path)),

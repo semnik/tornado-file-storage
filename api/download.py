@@ -3,6 +3,7 @@ import os
 import tornado.web
 from tornado import iostream, gen
 
+
 class DownloadHandler(tornado.web.RequestHandler):
 
     def initialize(self, upload_dir):
@@ -31,10 +32,17 @@ class DownloadHandler(tornado.web.RequestHandler):
                         break
                     try:
                         self.write(chunk)
+                        # flush the current chunk to socket
                         await self.flush()
                     except iostream.StreamClosedError:
+                        # this means the client has closed the connection
+                        # so break the loop
                         break
                     finally:
+                        # deleting the chunk is very important because
+                        # if many clients are downloading files at the
+                        # same time, the chunks in memory will keep
+                        # increasing and will eat up the RAM
                         del chunk
                         # pause the coroutine so other handlers can run
                         await gen.sleep(0.000000001)  # 1 nanosecond
